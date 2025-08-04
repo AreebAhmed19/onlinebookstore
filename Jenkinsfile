@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3' // Make sure 'Maven 3' is set in Jenkins tools
+        maven 'Maven 3'
     }
 
     stages {
@@ -17,14 +17,26 @@ pipeline {
                 sh 'mvn clean install'
             }
         }
+
+        stage('Publish Test Results') {
+            steps {
+                junit 'target/surefire-reports/*.xml'
+            }
+        }
+
+        stage('Archive Artifact') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
     }
 
     post {
         success {
-            echo "Build successful!"
+            echo "✅ Build completed successfully!"
         }
         failure {
-            echo "Build failed!"
+            echo "❌ Build failed. Please check the logs."
         }
     }
 }
